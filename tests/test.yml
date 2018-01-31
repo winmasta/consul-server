@@ -3,5 +3,5 @@
   connection: local
   become: true
   roles:
-    - docker-latest
+    - winmasta.docker-latest
     - consul
