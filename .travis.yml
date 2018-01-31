@@ -17,6 +17,7 @@ before_install:
   - sudo apt-get update -y
 
 install:
+  # Make upper directory as role_path for ansible
   - dir=$(pwd) && printf "[defaults]\nroles_path = $(dirname $dir)" > ansible.cfg
 
   # Install Ansible.
