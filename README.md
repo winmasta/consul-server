@@ -58,7 +58,32 @@ Depends on latest Docker-CE installed:
 Example Playbook
 ----------------
 
-To use this role pull dependencies and create file hosts containing hostname or IP address of host, where you want to deploy consul server and execute following playbook
+To use this role:
+
+- create folder (in user $HOME folder in example below) and install role with dependencies from ansible-galaxy
+
+```bash
+cd ~/
+mkdir consul-server
+cd consul-server
+ansible-galaxy install winmasta.consul-server --roles-path .
+```
+
+- create file `hosts`, containing hostname(s) or IP address(es) of host(s), where you want to deploy consul server
+
+```bash
+echo "ENTER HOSTNAME OR IP" > hosts
+```
+
+- create file `ansible.cfg` in current folder
+
+```
+[defaults]
+remote_user = root
+host_key_checking = False
+```
+
+- create playbook in current folder `main.yml` with content
 
 ```yaml
 ---
@@ -74,16 +99,14 @@ To use this role pull dependencies and create file hosts containing hostname or 
   - setup:
 
   roles:
-    - docker-latest
-    - consul
+    - winmasta.docker-latest
+    - winmasta.consul
 ```
 
-Create in the same folder file ansible.cfg, example:
+- execute playbook `main.yml`
 
-```
-[defaults]
-remote_user = root
-host_key_checking = False
+```bash
+ansible-playbook -i hosts main.yml
 ```
 
 License
