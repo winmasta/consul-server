@@ -1,0 +1,115 @@
+---
+- name: Checking consul docker container
+  command: docker inspect -f=\{\{.State.Status\}\} consul
+  register: state
+  ignore_errors: yes
+  failed_when: False
+  changed_when: False
+
+- name: Check running consul tls
+  shell: "docker logs consul | grep 'TLS-Outgoing: true, TLS-Incoming: true'"
+  register: tls_state
+  ignore_errors: yes
+  failed_when: False
+  changed_when: False
+
+- name: Check running consul server for health
+  block:
+
+    - name: Make request to consul
+      uri:
+        url: http://{{ inventory_hostname }}:8500/v1/agent/self
+      register: res
+      failed_when: res.json.Config.Server != True
+      tags: curl_check
+
+  when: state.stdout == "running"
+
+- name: Spin up PKI if necessary and start consul container
+  block:
+
+    - name: Create consul directory
+      file:
+        path: "{{ CONSUL_DIR }}"
+        state: directory
+        mode: 0755
+
+    - name: Create TLS stuff
+      block:
+
+        - name: Create consul TLS directories
+          file:
+            path: "{{ CONSUL_CA_DIR }}"
+            state: directory
+            mode: 0755
+
+        - name: Set start CA serial
+          copy:
+            content: "{{ FIRST_CA_SERIAL }}"
+            dest: "{{ CONSUL_CA_DIR }}/{{ CERT_SERIAL_FILENAME }}"
+
+        - name: Create certindex file
+          copy:
+            content: ""
+            dest: "{{ CONSUL_CA_DIR }}/{{ CERT_DATABASE_FILENAME }}"
+
+        - name: Generate CA certificate and key
+          shell: openssl req -x509 -newkey {{ CA_KEYTYPE }} -keyout {{ CONSUL_CA_DIR }}/{{ CA_PRIVKEY_NAME }} \
+                 -days {{ CA_EXPIRE }} -nodes -out {{ CONSUL_CA_DIR }}/{{ CA_CERT_NAME }} -subj \
+                 /C="{{ CA_COUNTRY }}"/ST="{{ CA_STATE }}"/L="{{ CA_LOCALITY }}"/O="{{ CA_ORG_NAME }}"\
+                 /OU="{{ CA_ORG_UNIT_NAME }}"/CN="{{ CA_COMMON_NAME }}"/emailAddress="{{ CA_EMAIL }}"
+
+        - name: Generate consul CSR and wildcard key
+          shell: openssl req -newkey {{ CONSUL_KEYTYPE }} -nodes -out {{ CONSUL_CA_DIR }}/{{ CONSUL_CSR_FILENAME }}
+                 -keyout {{ CONSUL_CA_DIR }}/{{ CONSUL_KEY_FILENAME }} -subj /C="{{ CSR_COUNTRY }}"/ST="{{ CSR_STATE }}"\
+                 /L="{{ CSR_LOCALITY }}"/O="{{ CSR_ORG_NAME }}"/OU="{{ CSR_ORG_UNIT_NAME }}"/CN="{{ CSR_COMMON_NAME }}"\
+                 /emailAddress="{{ CSR_EMAIL }}"
+
+        - name: Create a certificate authority configuration file
+          template:
+            src: ca.j2
+            dest: "{{ CONSUL_CA_DIR }}/{{ CA_NAME }}.conf"
+
+        - name: Generate consul certificate and key
+          shell: cd {{ CONSUL_CA_DIR }} && openssl ca -batch -config {{ CONSUL_CA_DIR }}/{{ CA_NAME }}.conf -notext -in \
+                 {{ CONSUL_CA_DIR }}/{{ CONSUL_CSR_FILENAME }} -out {{ CONSUL_CA_DIR }}/{{ CONSUL_CERT_FILENAME }} && cp \
+                 {{ CONSUL_CA_DIR }}/{{ CA_CERT_NAME }} {{ CONSUL_CA_DIR }}/{{ CONSUL_KEY_FILENAME }} \
+                 {{ CONSUL_CA_DIR }}/{{ CONSUL_CERT_FILENAME}} {{ CONSUL_TLS_DIR }}/
+
+      when: (USE_TLS == True) and (tls_state.rc != 0)
+
+    - name: Generate consul encrypt
+      shell: dd if=/dev/urandom bs=16 count=1 | base64
+      register: CONSUL_ENCRYPT
+
+    - name: Parse consul encrypt
+      set_fact:
+        CONSUL_ENCRYPT="{{ CONSUL_ENCRYPT.stdout }}"
+
+    - name: Create consul configuration file
+      template:
+        src: consul.j2
+        dest: "{{ CONSUL_DIR }}/{{ CONSUL_CONF_FILENAME }}"
+
+    - name: Get public IP
+      ipify_facts:
+
+    - name: Start consul docker container
+      shell: docker stop consul || true && docker rm consul || true && docker run -d --net=host --name=consul -p 8500:8500 \
+           -v /etc/consul.d:/consul/config -v /etc/consul.d/tls:/etc/consul.d/tls --restart unless-stopped consul agent \
+          -ui -bind="{{ ipify_public_ip }}" -client="{{ ipify_public_ip }}"
+
+    - name: Wait for consul container starts
+      pause:
+        seconds: 30
+      tags: curl_check
+
+    - name: Check consul server
+      uri:
+        url: http://{{ inventory_hostname }}:8500/v1/agent/self
+      register: res
+      failed_when: res.json.Config.Server != True
+      tags: curl_check
+
+  when: (state.stdout != "running") or ((state.stdout == "running") and (tls_state.rc != 0) and (USE_TLS == True)) or
+        ((state.stdout == "running") and (tls_state.rc == 0) and (USE_TLS == False))
