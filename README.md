@@ -58,6 +58,34 @@ Depends on latest Docker-CE installed:
 Example Playbook
 ----------------
 
+To use this role pull dependencies and create file hosts containing hostname or IP address of host, where you want to deploy consul server and execute following playbook
+
+```yaml
+---
+- hosts: all
+  gather_facts: no
+
+  pre_tasks:
+
+  - name: Install required packages
+    raw: sudo apt-get update -y && sudo apt-get -y install python-simplejson python-pip
+    changed_when: False
+
+  - setup:
+
+  roles:
+    - docker-latest
+    - consul
+```
+
+Create in the same folder file ansible.cfg, example:
+
+```
+[defaults]
+remote_user = root
+host_key_checking = False
+```
+
 License
 -------
 
