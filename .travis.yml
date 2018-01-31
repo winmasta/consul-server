@@ -17,7 +17,7 @@ before_install:
   - sudo apt-get update -y
 
 install:
-  - "printf '[defaults]\nroles_path = ../' > ansible.cfg"
+  - dir=$(pwd) && printf "[defaults]\nroles_path = $(dirname $dir)" > ansible.cfg
 
   # Install Ansible.
   - if [ "$ANSIBLE_VERSION" = "latest" ]; then pip install ansible; else pip install ansible==$ANSIBLE_VERSION; fi
