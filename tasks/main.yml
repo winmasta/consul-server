@@ -97,7 +97,7 @@
     - name: Start consul docker container
       shell: docker stop consul || true && docker rm consul || true && docker run -d --net=host --name=consul -p 8500:8500 \
            -v /etc/consul.d:/consul/config -v /etc/consul.d/tls:/etc/consul.d/tls --restart unless-stopped consul agent \
-          -ui -bind="{{ ipify_public_ip }}" -client="{{ ipify_public_ip }}"
+           -ui -bind=127.0.0.1
 
     - name: Wait for consul container starts
       pause:
