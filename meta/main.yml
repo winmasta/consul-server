@@ -12,8 +12,8 @@ galaxy_info:
     - xenial
 
   galaxy_tags:
-  - consul
-  - sibedge
+    - consul
+    - sibedge
 
   dependencies:
-  - winmasta.docker-latest
+    - winmasta.docker-latest
