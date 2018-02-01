@@ -107,8 +107,8 @@
     - name: Check consul server
       uri:
         url: http://{{ inventory_hostname }}:8500/v1/agent/self
-      user: "{{ NGINX_DEFAULT_USER }}"
-      password: "{{ NGINX_DEFAULT_PASSWD }}"
+        user: "{{ NGINX_DEFAULT_USER }}"
+        password: "{{ NGINX_DEFAULT_PASSWD }}"
       register: res
       failed_when: res.json.Config.Server != True
       tags: curl_check
