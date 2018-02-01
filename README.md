@@ -108,7 +108,7 @@ host_key_checking = False
 
   roles:
     - winmasta.docker-latest
-    - winmasta.consul
+    - winmasta.consul-server
 ```
 
 - execute playbook `main.yml`
