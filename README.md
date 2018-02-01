@@ -55,7 +55,7 @@ Role Variables
 Dependencies
 ------------
 
-Depends on latest Docker-CE installed:
+Depends on:
  - winmasta.docker-latest
  - winmasta.nginx
 
