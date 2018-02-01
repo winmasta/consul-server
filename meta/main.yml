@@ -17,3 +17,4 @@ galaxy_info:
 
   dependencies:
     - winmasta.docker-latest
+    - winmasta.nginx

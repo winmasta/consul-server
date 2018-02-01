@@ -16,6 +16,7 @@ Role Variables
 --------------
 
 - CONSUL_DIR: /etc/consul.d # Directory of consul config files, will be mounted to container
+- CONSUL_PORT: 8500 # Default consul port
 - USE_TLS: True # Force to use TLS, can be True or False
 - CONSUL_TLS_DIR: "{{ CONSUL_DIR }}/tls" # Directory for TLS files (certificates and keys)
 - CONSUL_CA_DIR: "{{ CONSUL_TLS_DIR }}/CA" # Directory for TLS Certificate Authority files (certificates, keys, CSRs)
@@ -53,7 +54,8 @@ Dependencies
 ------------
 
 Depends on latest Docker-CE installed:
- - docker-latest
+ - winmasta.docker-latest
+ - winmasta.nginx
 
 Example Playbook
 ----------------
