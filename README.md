@@ -79,6 +79,7 @@ ansible-galaxy install -r requirements.yml --roles-path ../
 - create file `hosts`, containing hostname(s) or IP address(es) of host(s), where you want to deploy consul server
 
 ```bash
+cd ../
 echo "ENTER HOSTNAME OR IP" > hosts
 ```
 
