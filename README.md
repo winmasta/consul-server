@@ -69,6 +69,13 @@ cd consul-server
 ansible-galaxy install winmasta.consul-server --roles-path .
 ```
 
+- as soon as ansible-galaxy doesn't install role dependencies yet, you should do it manually
+
+```bash
+cd winmasta.consul-server
+ansible-galaxy install -r requirements.yml --roles-path ../
+```
+
 - create file `hosts`, containing hostname(s) or IP address(es) of host(s), where you want to deploy consul server
 
 ```bash
