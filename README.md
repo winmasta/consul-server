@@ -17,6 +17,8 @@ Role Variables
 
 - CONSUL_DIR: /etc/consul.d # Directory of consul config files, will be mounted to container
 - CONSUL_PORT: 8500 # Default consul port
+- NGINX_DEFAULT_USER: admin # Nginx default user
+- NGINX_DEFAULT_PASSWD: admin # Nginx default password
 - USE_TLS: True # Force to use TLS, can be True or False
 - CONSUL_TLS_DIR: "{{ CONSUL_DIR }}/tls" # Directory for TLS files (certificates and keys)
 - CONSUL_CA_DIR: "{{ CONSUL_TLS_DIR }}/CA" # Directory for TLS Certificate Authority files (certificates, keys, CSRs)
@@ -74,28 +76,29 @@ ansible-galaxy install winmasta.consul-server --roles-path .
 - as soon as ansible-galaxy doesn't install role dependencies yet, you should do it manually
 
 ```bash
-cd winmasta.consul-server
-ansible-galaxy install -r requirements.yml --roles-path ../
+ansible-galaxy install -r winmasta.consul-server/requirements.yml --roles-path .
 ```
 
 - create file `hosts`, containing hostname(s) or IP address(es) of host(s), where you want to deploy consul server
 
 ```bash
-cd ../
 echo "ENTER HOSTNAME OR IP" > hosts
 ```
 
 - create file `ansible.cfg` in current folder
 
-```
+```bash
+cat > ansible.cfg << EOF
 [defaults]
 remote_user = root
 host_key_checking = False
+EOF
 ```
 
 - create playbook in current folder `main.yml` with content
 
-```yaml
+```bash
+cat > main.yml << EOF
 ---
 - hosts: all
   gather_facts: no
@@ -111,6 +114,7 @@ host_key_checking = False
   roles:
     - winmasta.docker-latest
     - winmasta.consul-server
+EOF
 ```
 
 - execute playbook `main.yml`

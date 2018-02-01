@@ -4,4 +4,5 @@
   become: true
   roles:
     - winmasta.docker-latest
+    - winmasta.nginx
     - consul-server
