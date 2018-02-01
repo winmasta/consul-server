@@ -13,18 +13,6 @@
   failed_when: False
   changed_when: False
 
-- name: Check running consul server for health
-  block:
-
-    - name: Make request to consul
-      uri:
-        url: http://{{ inventory_hostname }}:8500/v1/agent/self
-      register: res
-      failed_when: res.json.Config.Server != True
-      tags: curl_check
-
-  when: state.stdout == "running"
-
 - name: Spin up PKI if necessary and start consul container
   block:
 
