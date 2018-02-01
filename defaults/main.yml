@@ -1,5 +1,6 @@
 ---
 CONSUL_DIR: /etc/consul.d
+CONSUL_PORT: 8500
 USE_TLS: True
 CONSUL_TLS_DIR: "{{ CONSUL_DIR }}/tls"
 CONSUL_CA_DIR: "{{ CONSUL_TLS_DIR }}/CA"
