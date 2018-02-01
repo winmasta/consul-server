@@ -113,6 +113,7 @@ cat > main.yml << EOF
 
   roles:
     - winmasta.docker-latest
+    - winmasta.nginx
     - winmasta.consul-server
 EOF
 ```
