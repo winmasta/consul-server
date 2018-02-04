@@ -4,21 +4,36 @@
     path: "{{ CONSUL_DIR }}"
     state: directory
     mode: 0755
+  register: res
 
-- name: Generate consul encrypt
-  shell: dd if=/dev/urandom bs=16 count=1 | base64
-  register: CONSUL_ENCRYPT
+- name: Create config files if "{{ CONSUL_DIR }}" directory not exists
+  block:
 
-- name: Parse consul encrypt
-  set_fact:
-    CONSUL_ENCRYPT="{{ CONSUL_ENCRYPT.stdout }}"
+    - name: Generate consul encrypt
+      shell: dd if=/dev/urandom bs=16 count=1 | base64
+      register: CONSUL_ENCRYPT
 
-- name: Create consul configuration file
-  template:
-    src: consul.j2
-    dest: "{{ CONSUL_DIR }}/{{ CONSUL_CONF_FILENAME }}"
+    - name: Parse consul encrypt
+      set_fact:
+        CONSUL_ENCRYPT="{{ CONSUL_ENCRYPT.stdout }}"
+
+    - name: Create consul configuration file
+      template:
+        src: consul.j2
+        dest: "{{ CONSUL_DIR }}/{{ CONSUL_CONF_FILENAME }}"
+
+  when: res.changed != False
 
 - name: Start consul docker container
-  shell: docker stop consul || true && docker rm consul || true && docker run -d --net=host --name=consul -p 8500:8500 \
-       -v /etc/consul.d:/consul/config -v /etc/consul.d/tls:/etc/consul.d/tls --restart unless-stopped consul agent \
-       -ui -bind=127.0.0.1 -http-port="{{ CONSUL_PORT }}"
+  docker_container:
+    name: consul
+    image: consul
+    network_mode: host
+    ports:
+      - "{{ CONSUL_PORT }}:{{ CONSUL_PORT }}"
+    volumes:
+      - "{{ CONSUL_DIR }}:/consul/config"
+      - "{{ TLS_DIR }}:/etc/consul.d/tls"
+    restart_policy: unless-stopped
+    command: agent -ui -bind=127.0.0.1 -http-port="{{ CONSUL_PORT }}"
+  notify: restart nginx
