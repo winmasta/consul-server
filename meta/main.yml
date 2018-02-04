@@ -2,7 +2,7 @@ galaxy_info:
   author: Konstantin Shestakov
   description: spin up consul server, TLS mode may be choosen
   company: SibEDGE
-  license: license (MIT)
+  license: MIT
   min_ansible_version: 2.3.3.0
 
   platforms:

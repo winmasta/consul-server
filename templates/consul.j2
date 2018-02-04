@@ -6,8 +6,8 @@
     "encrypt": "{{ CONSUL_ENCRYPT }}",
     {% if USE_TLS == True %}
     "ca_file": "/etc/consul.d/tls/{{ CA_CERT_NAME }}",
-    "cert_file": "/etc/consul.d/tls/{{ CONSUL_CERT_FILENAME }}",
-    "key_file": "/etc/consul.d/tls/{{ CONSUL_KEY_FILENAME }}",
+    "cert_file": "/etc/consul.d/tls/{{ CLIENT_CERT_FILENAME }}",
+    "key_file": "/etc/consul.d/tls/{{ CLIENT_KEY_FILENAME }}",
     "verify_incoming": true,
     "verify_outgoing": true,
     {% endif %}
