@@ -1,5 +1,5 @@
 ---
-USE_TLS: True
+USE_TLS: False
 CONSUL_DIR: /etc/consul.d
 CONSUL_CONF_FILENAME: config.json
 CONSUL_PORT: 8500
