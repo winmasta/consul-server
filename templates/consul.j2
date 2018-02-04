@@ -5,9 +5,9 @@
     "data_dir": "/var/consul",
     "encrypt": "{{ CONSUL_ENCRYPT }}",
     {% if USE_TLS == True %}
-    "ca_file": "/etc/consul.d/tls/{{ CA_CERT_NAME }}",
-    "cert_file": "/etc/consul.d/tls/{{ CLIENT_CERT_FILENAME }}",
-    "key_file": "/etc/consul.d/tls/{{ CLIENT_KEY_FILENAME }}",
+    "ca_file": "{{ TLS_DIR }}/{{ CA_CERT_NAME }}",
+    "cert_file": "{{ TLS_DIR }}/{{ CLIENT_CERT_FILENAME }}",
+    "key_file": "{{ TLS_DIR }}/{{ CLIENT_KEY_FILENAME }}",
     "verify_incoming": true,
     "verify_outgoing": true,
     {% endif %}
